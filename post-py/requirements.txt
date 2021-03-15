@@ -1,0 +1,7 @@
+prometheus_client
+flask
+pymongo
+structlog
+py-zipkin
+requests
+

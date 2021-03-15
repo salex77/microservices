@@ -10,22 +10,58 @@ services:
           - post_db
           - comment_db
   ui:
-    build: ./ui
-    image: ${USERNAME}/ui:${UI_VER}
+    image: ${USER_NAME}/ui:${UI_VER}
     ports:
       - 9292:9292/tcp
     networks:
-      - reddit
+      reddit:
+        aliases:
+           - ui
   post:
-    build: ./post-py
-    image: ${USERNAME}/post:${POST_VER}
+    image: ${USER_NAME}/post:${POST_VER}
     networks:
-      - reddit
+      reddit:
+        aliases:
+           - post
   comment:
-    build: ./comment
-    image: ${USERNAME}/comment:${COMMENT_VER}
+    image: ${USER_NAME}/comment:${COMMENT_VER}
     networks:
-      - reddit
+      reddit:
+        aliases:
+           - comment
+  prometheus:
+    image: ${USER_NAME}/prometheus
+    ports:
+      - '9090:9090'
+    networks:
+      reddit:
+        aliases:
+           - prometheus
+  node-exporter:
+    image: prom/node-exporter:v0.15.0
+    user: root
+    volumes:
+        - /proc:/host/proc:ro
+        - /sys:/host/sys:ro
+        - /:/rootfs:ro
+    command:
+        - '--path.procfs=/host/proc'
+        - '--path.sysfs=/host/sys'
+        - '--collector.filesystem.ignored-mount-points="^/(sys|proc|dev|host|etc)($$|/)"'
+    networks:
+       reddit:
+         aliases:
+            - node-exporter 
+
+  mongodb-exporter:
+     image: ${USER_NAME}/mongodb-exporter:${MONGODB_EXPORTER_VERSION}
+     networks:
+        reddit:
+          aliases:
+             - mongodb-exporter
+     environment:
+          MONGODB_URI: "mongodb://post_db:27017"
+
 volumes:
   post_db:
 
