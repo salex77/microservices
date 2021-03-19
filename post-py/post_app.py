@@ -14,6 +14,8 @@ from py_zipkin.zipkin import zipkin_span, ZipkinAttrs
 
 
 CONTENT_TYPE_LATEST = str('text/plain; version=0.0.4; charset=utf-8')
+#REQUEST_DB_LATENCY = prometheus_client.Histogram('post_read_db_seconds', 'Request DB time')
+#POST_COUNT = prometheus_client.Counter('post_count', 'A counter of new posts')
 POST_DATABASE_HOST = os.getenv('POST_DATABASE_HOST', '127.0.0.1')
 POST_DATABASE_PORT = os.getenv('POST_DATABASE_PORT', '27017')
 ZIPKIN_HOST = os.getenv('ZIPKIN_HOST', 'zipkin')
@@ -131,6 +133,7 @@ def add_post():
         title = request.values.get('title')
         link = request.values.get('link')
         created_at = request.values.get('created_at')
+        
     except Exception as e:
         log_event('error', 'request_error',
                   "Bad input parameters. Reason: {}".format(str(e)))
@@ -147,6 +150,7 @@ def add_post():
         log_event('info', 'post_create', 'Successfully created a new post',
                   {'title': title, 'link': link})
         app.post_count.inc()
+#        POST_COUNT.inc()
         return 'OK'
 
 

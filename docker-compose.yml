@@ -32,7 +32,7 @@ services:
   prometheus:
     image: ${USER_NAME}/prometheus
     ports:
-      - '9090:9090'
+      - 9090:9090
     networks:
       reddit:
         aliases:
@@ -52,7 +52,6 @@ services:
        reddit:
          aliases:
             - node-exporter 
-
   mongodb-exporter:
      image: ${USER_NAME}/mongodb-exporter:${MONGODB_EXPORTER_VERSION}
      networks:
@@ -61,9 +60,51 @@ services:
              - mongodb-exporter
      environment:
           MONGODB_URI: "mongodb://post_db:27017"
+  cadvisor:
+     image: google/cadvisor:latest
+     volumes:
+         - '/:/rootfs:ro'
+         - '/var/run:/var/run:rw'
+         - '/sys:/sys:ro'
+         - '/var/lib/docker/:/var/lib/docker:ro'
+     ports:
+         - 8080:8080
+     networks:
+       reddit:
+         aliases:
+            - cadvisor
+              
+  grafana:
+     image: grafana/grafana
+     volumes:
+        - grafana_data:/var/lib/grafana
+     environment:
+        - GF_SECURITY_ADMIN_USER=admin
+        - GF_SECURITY_ADMIN_PASSWORD=secret
+     depends_on:
+        - prometheus
+     ports:
+        - 3000:3000
+     networks:
+       reddit:
+         aliases:
+            - grafana
+
+  alertmanager:
+     image: ${USER_NAME}/alertmanager:latest 
+     command: 
+        - '--config.file=/etc/alertmanager/config.yml'
+     ports: 
+        - 9093:9093
+     networks:
+       reddit:
+         aliases:
+            - alertmanager
 
 volumes:
   post_db:
+  grafana_data:    
 
 networks:
   reddit:
+
