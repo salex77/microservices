@@ -1,8 +1,8 @@
 global:
-  slack_api_url: 'https://hooks.slack.com/services/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'
+  slack_api_url: 'https://webhook'
 route:
    receiver: 'slack-notifications'
 receivers:
  - name: 'slack-notifications'
    slack_configs:
-   - channel: '#hostavtomotiv'
+   - channel: '#channel'
